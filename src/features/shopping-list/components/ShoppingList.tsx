@@ -75,7 +75,7 @@ export function ShoppingList() {
   };
 
   const confirmClear = () => {
-    Alert.alert('Delete list and all its items?', undefined, [
+    Alert.alert('Delete list and all its items?', "This action can't be undone.", [
       { text: 'No', style: 'cancel' },
       { text: 'Yes', style: 'destructive', onPress: clear },
     ]);
