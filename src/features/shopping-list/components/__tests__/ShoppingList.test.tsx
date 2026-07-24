@@ -53,14 +53,14 @@ describe('ShoppingList — finish-shopping flow', () => {
     expect(alertSpy.mock.calls[0][0]).toBe('Done shopping?');
   });
 
-  it('archives when OK is chosen', () => {
+  it('archives when Yes is chosen', () => {
     const actions = mockStore([makeItem({ id: '2', name: 'Eggs', bought_at: null })]);
     const alertSpy = jest.spyOn(Alert, 'alert');
     const { getByLabelText } = render(<ShoppingList />);
 
     fireEvent.press(getByLabelText('Mark Eggs bought'));
-    const ok = buttonsOf(alertSpy).find((b) => b.text === 'OK');
-    act(() => ok?.onPress?.());
+    const yes = buttonsOf(alertSpy).find((b) => b.text === 'Yes');
+    act(() => yes?.onPress?.());
 
     expect(actions.archive).toHaveBeenCalledTimes(1);
   });

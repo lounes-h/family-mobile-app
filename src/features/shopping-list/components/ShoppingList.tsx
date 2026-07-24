@@ -68,7 +68,7 @@ export function ShoppingList() {
         [
           // Revert the item we just checked so shopping can continue.
           { text: 'Still shopping', style: 'cancel', onPress: () => toggleBought(id) },
-          { text: 'OK', onPress: archive },
+          { text: 'Yes', onPress: archive },
         ],
       );
     }

@@ -31,7 +31,7 @@ extras. Add items, check them off mentally, clear the list, start again.
      is plain text and the delete control is hidden.
    - When the LAST unbought item is marked bought (everything is checked
      off), a dialog titled "Done shopping?" appears:
-     - **OK** archives the list (the active list empties).
+     - **Yes** archives the list (the active list empties).
      - **Still shopping** un-marks the item that was just checked.
    - Stored as a `bought_at` timestamp (null = not bought), following the
      same sync-ready shape as `deleted_at`. Archiving sets a separate
