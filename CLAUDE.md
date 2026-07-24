@@ -19,3 +19,7 @@ Do NOT build other features yet, even if the architecture supports them.
 
 ## More docs
 
+
+## Package manager
+- Always use yarn. Never use npm or npx.
+
