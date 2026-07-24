@@ -11,8 +11,16 @@ import { ShoppingItemRow } from './ShoppingItemRow';
 // it reads from the store and wires the pieces together. Keyboard placement is
 // handled inside AddItemBar, so there's no KeyboardAvoidingView here.
 export function ShoppingList() {
-  const { items, loaded, load, addItem, renameItem, deleteItem, clear } =
-    useShoppingList();
+  const {
+    items,
+    loaded,
+    load,
+    addItem,
+    renameItem,
+    toggleBought,
+    deleteItem,
+    clear,
+  } = useShoppingList();
   const addBarRef = useRef<AddItemBarHandle>(null);
 
   // Load persisted items once on mount (this is why they survive a restart).
@@ -65,6 +73,7 @@ export function ShoppingList() {
               <ShoppingItemRow
                 item={item}
                 onRename={renameItem}
+                onToggleBought={toggleBought}
                 onDelete={deleteItem}
               />
             )}

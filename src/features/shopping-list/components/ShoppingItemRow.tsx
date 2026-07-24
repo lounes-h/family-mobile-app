@@ -7,14 +7,22 @@ import type { ShoppingItem } from '../types';
 type Props = {
   item: ShoppingItem;
   onRename: (id: string, name: string) => void;
+  onToggleBought: (id: string) => void;
   onDelete: (id: string) => void;
 };
 
-// One row: a bullet, the item name, and a trailing control.
-//   - Not editing: tapping the name starts an edit; the ✕ deletes the item.
+// One row: a check circle, the item name, and a trailing control.
+//   - Not editing: tapping the circle marks the item bought (or un-bought);
+//     tapping the name starts an edit; the ✕ deletes the item.
 //   - Editing: an in-place text field; the ✓ confirms the change. Tapping away
 //     (blur) discards the edit and keeps the old name.
-export function ShoppingItemRow({ item, onRename, onDelete }: Props) {
+export function ShoppingItemRow({
+  item,
+  onRename,
+  onToggleBought,
+  onDelete,
+}: Props) {
+  const bought = item.bought_at !== null;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.name);
 
@@ -88,10 +96,23 @@ export function ShoppingItemRow({ item, onRename, onDelete }: Props) {
         </>
       ) : (
         <>
-          {/* Bullet + name are one tap target, so tapping the circle edits too. */}
+          {/* Tapping the circle marks the item bought / un-bought. */}
+          <Pressable
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: bought }}
+            accessibilityLabel={`Mark ${item.name} ${bought ? 'not bought' : 'bought'}`}
+            hitSlop={8}
+            onPress={() => onToggleBought(item.id)}
+            style={styles.checkTap}
+          >
+            <View style={[styles.bullet, bought && styles.bulletBought]}>
+              {bought && <Text style={styles.bulletCheck}>✓</Text>}
+            </View>
+          </Pressable>
           <Pressable style={styles.tapArea} onPress={beginEdit}>
-            <View style={styles.bullet} />
-            <Text style={styles.name}>{item.name}</Text>
+            <Text style={[styles.name, bought && styles.nameBought]}>
+              {item.name}
+            </Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -118,21 +139,38 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     gap: spacing.md,
   },
+  checkTap: {
+    paddingVertical: spacing.xs,
+    justifyContent: 'center',
+  },
   bullet: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: colors.textMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bulletBought: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  bulletCheck: {
+    color: colors.primaryText,
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 16,
   },
   tapArea: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
     paddingVertical: spacing.xs,
   },
   name: { fontSize: typography.body, color: colors.text },
+  nameBought: {
+    color: colors.textMuted,
+    textDecorationLine: 'line-through',
+  },
   input: { flex: 1, minHeight: 40 },
   action: { padding: spacing.xs },
   delete: { fontSize: typography.body, color: colors.textMuted },

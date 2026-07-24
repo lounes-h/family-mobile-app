@@ -21,12 +21,19 @@ extras. Add items, check them off mentally, clear the list, start again.
    - Confirming saves the new name. Saving an empty name is not allowed
      (keep the old name or cancel the edit).
 
-3. **Delete an item**
+3. **Mark an item bought**
+   - Tapping the circle to the left of an item marks it as bought
+     (filled circle + strikethrough). Tapping again un-marks it.
+   - Bought items stay in the list; they are not removed or reordered.
+   - Stored as a `bought_at` timestamp (null = not bought), following the
+     same sync-ready shape as `deleted_at`.
+
+4. **Delete an item**
    - Each item has a small delete control (an "x" or trash icon).
    - Deleting removes just that item. No confirmation dialog needed —
      keep it fast.
 
-4. **Clear the whole list**
+5. **Clear the whole list**
    - A "Clear" button is visible somewhere on the page (top of the list
      is fine).
    - Tapping it removes ALL items so the user can start a new list from
@@ -84,7 +91,6 @@ convention in docs/conventions.md).
 
 Do NOT build these yet, even if they seem easy or useful:
 
-- Checking items off / marking as bought
 - Quantities, prices, or units
 - Categories or sorting options
 - Sharing lists or multiple lists (sharing is planned for v2 — the

@@ -12,11 +12,12 @@ type ShoppingListState = {
   load: () => void;
   addItem: (name: string) => void;
   renameItem: (id: string, name: string) => void;
+  toggleBought: (id: string) => void;
   deleteItem: (id: string) => void;
   clear: () => void;
 };
 
-export const useShoppingList = create<ShoppingListState>((set) => {
+export const useShoppingList = create<ShoppingListState>((set, get) => {
   const refresh = () => set({ items: db.listItems(), loaded: true });
 
   return {
@@ -34,6 +35,13 @@ export const useShoppingList = create<ShoppingListState>((set) => {
     renameItem: (id, name) => {
       if (!name.trim()) return; // empty rename is a no-op (keeps old name)
       db.renameItem(id, name);
+      refresh();
+    },
+
+    toggleBought: (id) => {
+      const item = get().items.find((i) => i.id === id);
+      if (!item) return;
+      db.setBought(id, item.bought_at === null);
       refresh();
     },
 

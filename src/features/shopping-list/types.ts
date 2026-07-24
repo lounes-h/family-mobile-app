@@ -6,4 +6,5 @@ export type ShoppingItem = {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  bought_at: string | null; // null = not yet bought
 };

@@ -22,6 +22,13 @@ const migrations: ((db: SQLiteDatabase) => void)[] = [
         ON shopping_items (deleted_at, created_at);
     `);
   },
+
+  // v2 — mark items as bought. bought_at is a timestamp (null = not bought),
+  // following the same nullable-timestamp shape as deleted_at so sync can
+  // reason about it. Existing rows get NULL automatically.
+  (db) => {
+    db.execSync(`ALTER TABLE shopping_items ADD COLUMN bought_at TEXT`);
+  },
 ];
 
 // Applies any migrations the database hasn't seen yet, in order, inside a

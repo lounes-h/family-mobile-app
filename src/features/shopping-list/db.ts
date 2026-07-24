@@ -36,11 +36,13 @@ export function insertItem(name: string): ShoppingItem {
     created_at: now(),
     updated_at: now(),
     deleted_at: null,
+    bought_at: null,
   };
 
   db().runSync(
-    `INSERT INTO shopping_items (id, name, created_at, updated_at, deleted_at)
-     VALUES (?, ?, ?, ?, NULL)`,
+    `INSERT INTO shopping_items
+       (id, name, created_at, updated_at, deleted_at, bought_at)
+     VALUES (?, ?, ?, ?, NULL, NULL)`,
     item.id,
     item.name,
     item.created_at,
@@ -61,6 +63,19 @@ export function renameItem(itemId: string, name: string): void {
      WHERE id = ? AND deleted_at IS NULL`,
     trimmed,
     now(),
+    itemId,
+  );
+}
+
+// Mark an item bought (bought_at = now) or un-bought (bought_at = null).
+export function setBought(itemId: string, bought: boolean): void {
+  const ts = now();
+  db().runSync(
+    `UPDATE shopping_items
+     SET bought_at = ?, updated_at = ?
+     WHERE id = ? AND deleted_at IS NULL`,
+    bought ? ts : null,
+    ts,
     itemId,
   );
 }
