@@ -158,3 +158,28 @@ Implementation notes for when this is picked up:
   fast to use.
 - Stores could later graduate to their own table if they need reuse
   across items (a picklist of known stores) — decide when building.
+
+### Archived lists (history + reuse)
+
+Archiving a finished list already preserves its rows in the DB
+(`archived_at` set, not deleted — see "Mark an item bought" above). Two
+planned uses for that preserved data:
+
+1. **History** — a screen that lists past shopping trips (grouped by the
+   `archived_at` timestamp) so the user can look back at what they bought
+   and when.
+2. **Populate a new list** — let the user start a fresh list from an old
+   one: "buy these again" copies the items of an archived trip into a new
+   active list (new UUIDs, fresh `created_at`, `bought_at`/`archived_at`
+   cleared). Handy for recurring/weekly shops.
+
+Implementation notes for when this is picked up:
+
+- The data is already there; this is mainly read paths + a "copy to new
+  list" write. No schema change needed for a first cut, though grouping
+  trips cleanly may later want an explicit `list_id` / `lists` table
+  (each archive = one list) instead of grouping by `archived_at`.
+- Reuse should INSERT new rows (never un-archive the originals), so
+  history stays intact.
+- All of it still goes through the feature's `db.ts` — no component or
+  store reaches into SQL directly.
