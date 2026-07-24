@@ -95,3 +95,29 @@ describe('ShoppingList — finish-shopping flow', () => {
     expect(alertSpy).not.toHaveBeenCalled();
   });
 });
+
+describe('ShoppingList — clear', () => {
+  it('confirms with a delete-titled dialog and clears on Yes', () => {
+    const actions = mockStore([makeItem({ id: '1', name: 'Milk' })]);
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const { getByText } = render(<ShoppingList />);
+
+    fireEvent.press(getByText('Clear'));
+
+    expect(alertSpy.mock.calls[0][0]).toBe('Delete list and all its items');
+    const yes = buttonsOf(alertSpy).find((b) => b.text === 'Yes');
+    act(() => yes?.onPress?.());
+    expect(actions.clear).toHaveBeenCalledTimes(1);
+  });
+
+  it('does nothing on No', () => {
+    const actions = mockStore([makeItem({ id: '1', name: 'Milk' })]);
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const { getByText } = render(<ShoppingList />);
+
+    fireEvent.press(getByText('Clear'));
+    const no = buttonsOf(alertSpy).find((b) => b.text === 'No');
+    act(() => no?.onPress?.());
+    expect(actions.clear).not.toHaveBeenCalled();
+  });
+});

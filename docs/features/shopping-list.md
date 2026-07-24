@@ -49,8 +49,10 @@ extras. Add items, check them off mentally, clear the list, start again.
      is fine).
    - Tapping it removes ALL items so the user can start a new list from
      scratch.
-   - Show one simple confirmation ("Have you done shopping?") because this
-     deletes everything.
+   - Clear is a DELETE, distinct from archiving (Done shopping) — the
+     items are soft-deleted, not preserved to history. The confirmation
+     makes this explicit: titled "Delete list and all its items" with
+     "No" / "Yes" buttons.
    - The button is hidden or disabled when the list is empty.
 
 ## Empty state

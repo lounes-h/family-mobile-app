@@ -75,9 +75,9 @@ export function ShoppingList() {
   };
 
   const confirmClear = () => {
-    Alert.alert('Have you done shopping?', undefined, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Clear', style: 'destructive', onPress: clear },
+    Alert.alert('Delete list and all its items', undefined, [
+      { text: 'No', style: 'cancel' },
+      { text: 'Yes', style: 'destructive', onPress: clear },
     ]);
   };
 
