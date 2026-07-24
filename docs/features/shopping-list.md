@@ -106,3 +106,38 @@ Do NOT build these yet, even if they seem easy or useful:
 - [ ] Clear button empties the whole list (with confirmation)
 - [ ] Empty list shows "tap to add item" and it opens the input
 - [ ] Items persist after a page refresh
+
+## Future versions (not now — ideas for later)
+
+These are NOT part of v1. Listed here so the direction is captured; do
+not build them until the roadmap explicitly says so.
+
+### Advanced shopping list
+
+An optional "advanced" mode that adds two things to each item:
+
+1. **Store** — the shop the item is for (e.g. "Costco", "Trader Joe's").
+   Lets one list group items by where you're going, or be filtered to a
+   single store while you're there.
+2. **Quantity** — an amount plus a unit. Units cover both counts and
+   weights/volumes: `count`, `lbs`, `oz`, `kg`, `g`, `L`, `ml`, etc.
+   (e.g. "Bananas × 6", "Flour 2 lbs").
+
+Sketch of the extra fields (still following the sync-ready rules — UUIDs,
+`created_at`/`updated_at`, soft delete):
+
+| Field       | Type            | Notes                                   |
+|-------------|-----------------|-----------------------------------------|
+| store       | string or null  | which shop; null = unassigned           |
+| quantity    | number or null  | the amount; null = unspecified          |
+| unit        | string or null  | `count` \| `lbs` \| `oz` \| `kg` \| …    |
+
+Implementation notes for when this is picked up:
+
+- Add the columns as a NEW migration in `src/shared/db/` — never edit the
+  v1 migration, which has already run on devices.
+- Keep the simple add flow the default; surface store/quantity behind an
+  "advanced" toggle or an expanded item editor so the basic list stays
+  fast to use.
+- Stores could later graduate to their own table if they need reuse
+  across items (a picklist of known stores) — decide when building.
