@@ -16,6 +16,7 @@ shopping list first, then todos, reminders, home cleaning, money management.
 
 - `yarn start` — Expo dev server (`yarn ios` / `yarn android` / `yarn web`)
 - `yarn typecheck` — `tsc --noEmit`
+- `yarn test` — Jest unit/integration + component tests
 - `yarn expo-doctor` — project health check
 - `yarn expo install <pkg>` — add SDK packages at SDK-compatible versions
 
@@ -33,4 +34,7 @@ Do NOT build other features yet, even if the architecture supports them.
 
 ## Package manager
 - Always use yarn. Never use npm or npx.
+
+## tests
+- Always add unit/integration tests when updating or creating files/feature where necessary
 
