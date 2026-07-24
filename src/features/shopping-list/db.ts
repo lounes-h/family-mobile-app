@@ -15,12 +15,16 @@ function db() {
   return getDatabase();
 }
 
-// Active items, oldest first (created_at sort).
+// Active items. Unbought first (in original created_at order), then bought
+// items at the bottom (in the order they were bought). This gives "mark bought
+// → moves to the bottom" and "un-mark → returns to its original place" for free.
 export function listItems(): ShoppingItem[] {
   return db().getAllSync<ShoppingItem>(
     `SELECT * FROM shopping_items
      WHERE deleted_at IS NULL
-     ORDER BY created_at ASC`,
+     ORDER BY
+       CASE WHEN bought_at IS NULL THEN 0 ELSE 1 END,
+       CASE WHEN bought_at IS NULL THEN created_at ELSE bought_at END ASC`,
   );
 }
 

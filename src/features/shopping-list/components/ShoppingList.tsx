@@ -19,6 +19,7 @@ export function ShoppingList() {
     renameItem,
     toggleBought,
     deleteItem,
+    archive,
     clear,
   } = useShoppingList();
   const addBarRef = useRef<AddItemBarHandle>(null);
@@ -29,6 +30,27 @@ export function ShoppingList() {
   }, [load]);
 
   const openAdd = () => addBarRef.current?.open();
+
+  // Toggling bought, plus the "everything is checked off" flow: when the last
+  // unbought item is marked bought, offer to archive the finished list.
+  const handleToggleBought = (id: string) => {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+
+    const markingBought = item.bought_at === null;
+    const unboughtCount = items.filter((i) => i.bought_at === null).length;
+    const wasLastUnbought = markingBought && unboughtCount === 1;
+
+    toggleBought(id);
+
+    if (wasLastUnbought) {
+      Alert.alert('Have you finished shopping?', 'Everything is checked off.', [
+        // Revert the item we just checked so shopping can continue.
+        { text: 'Still shopping', style: 'cancel', onPress: () => toggleBought(id) },
+        { text: 'OK', onPress: archive },
+      ]);
+    }
+  };
 
   const confirmClear = () => {
     Alert.alert('Have you done shopping?', undefined, [
@@ -73,7 +95,7 @@ export function ShoppingList() {
               <ShoppingItemRow
                 item={item}
                 onRename={renameItem}
-                onToggleBought={toggleBought}
+                onToggleBought={handleToggleBought}
                 onDelete={deleteItem}
               />
             )}

@@ -14,6 +14,7 @@ type ShoppingListState = {
   renameItem: (id: string, name: string) => void;
   toggleBought: (id: string) => void;
   deleteItem: (id: string) => void;
+  archive: () => void;
   clear: () => void;
 };
 
@@ -47,6 +48,15 @@ export const useShoppingList = create<ShoppingListState>((set, get) => {
 
     deleteItem: (id) => {
       db.softDeleteItem(id);
+      refresh();
+    },
+
+    // Archive the finished list. For now this soft-deletes every item (rows
+    // are preserved in the DB, the active view empties) — the same mechanism
+    // as clear, but a distinct action so a real "archived lists" view can
+    // diverge here later without touching callers.
+    archive: () => {
+      db.softDeleteAll();
       refresh();
     },
 

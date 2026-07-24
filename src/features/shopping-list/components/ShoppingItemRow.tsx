@@ -109,20 +109,28 @@ export function ShoppingItemRow({
               {bought && <Text style={styles.bulletCheck}>✓</Text>}
             </View>
           </Pressable>
-          <Pressable style={styles.tapArea} onPress={beginEdit}>
-            <Text style={[styles.name, bought && styles.nameBought]}>
-              {item.name}
-            </Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Delete ${item.name}`}
-            hitSlop={8}
-            onPress={() => onDelete(item.id)}
-            style={styles.action}
-          >
-            <Text style={styles.delete}>✕</Text>
-          </Pressable>
+          {/* Bought items can't be edited — show the name as plain text. */}
+          {bought ? (
+            <View style={styles.tapArea}>
+              <Text style={[styles.name, styles.nameBought]}>{item.name}</Text>
+            </View>
+          ) : (
+            <Pressable style={styles.tapArea} onPress={beginEdit}>
+              <Text style={styles.name}>{item.name}</Text>
+            </Pressable>
+          )}
+          {/* Delete is disabled for bought items (only un-marking is allowed). */}
+          {!bought && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Delete ${item.name}`}
+              hitSlop={8}
+              onPress={() => onDelete(item.id)}
+              style={styles.action}
+            >
+              <Text style={styles.delete}>✕</Text>
+            </Pressable>
+          )}
         </>
       )}
     </View>

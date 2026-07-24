@@ -24,9 +24,17 @@ extras. Add items, check them off mentally, clear the list, start again.
 3. **Mark an item bought**
    - Tapping the circle to the left of an item marks it as bought
      (filled circle + strikethrough). Tapping again un-marks it.
-   - Bought items stay in the list; they are not removed or reordered.
+   - A bought item moves to the bottom of the list. Un-marking it returns
+     it to its original place (unbought items keep their created order).
+   - Bought items cannot be edited or deleted — only un-marked. Their name
+     is plain text and the delete control is hidden.
+   - When the LAST unbought item is marked bought (everything is checked
+     off), a dialog asks "Have you finished shopping?":
+     - **OK** archives the list (all items soft-deleted; the list empties).
+     - **Still shopping** un-marks the item that was just checked.
    - Stored as a `bought_at` timestamp (null = not bought), following the
-     same sync-ready shape as `deleted_at`.
+     same sync-ready shape as `deleted_at`. Archiving currently reuses the
+     soft-delete mechanism; a dedicated "archived lists" view is future work.
 
 4. **Delete an item**
    - Each item has a small delete control (an "x" or trash icon).
