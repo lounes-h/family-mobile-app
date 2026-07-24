@@ -58,7 +58,11 @@ export const AddItemBar = forwardRef<AddItemBarHandle, Props>(function AddItemBa
   };
 
   // Lift above the keyboard when open; otherwise rest above the home indicator.
-  const paddingBottom = keyboardHeight > 0 ? keyboardHeight : insets.bottom;
+  // With Android edge-to-edge the reported keyboard height excludes the
+  // navigation-bar inset, but the keyboard draws from the true screen bottom —
+  // so add insets.bottom to clear the last sliver.
+  const paddingBottom =
+    keyboardHeight > 0 ? keyboardHeight + insets.bottom : insets.bottom;
 
   return (
     <View style={[styles.bar, { paddingBottom }]}>
