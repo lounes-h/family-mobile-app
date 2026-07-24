@@ -60,10 +60,9 @@ export function ShoppingItemRow({ item, onRename, onDelete }: Props) {
 
   return (
     <View style={styles.row}>
-      <View style={styles.bullet} />
-
       {editing ? (
         <>
+          <View style={styles.bullet} />
           <Input
             value={draft}
             onChangeText={setDraft}
@@ -89,7 +88,9 @@ export function ShoppingItemRow({ item, onRename, onDelete }: Props) {
         </>
       ) : (
         <>
-          <Pressable style={styles.namePress} onPress={beginEdit}>
+          {/* Bullet + name are one tap target, so tapping the circle edits too. */}
+          <Pressable style={styles.tapArea} onPress={beginEdit}>
+            <View style={styles.bullet} />
             <Text style={styles.name}>{item.name}</Text>
           </Pressable>
           <Pressable
@@ -124,7 +125,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.textMuted,
   },
-  namePress: { flex: 1, paddingVertical: spacing.xs },
+  tapArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.xs,
+  },
   name: { fontSize: typography.body, color: colors.text },
   input: { flex: 1, minHeight: 40 },
   action: { padding: spacing.xs },
