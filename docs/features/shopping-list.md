@@ -13,8 +13,8 @@ extras. Add items, check them off mentally, clear the list, start again.
    - Typing a name and confirming (Enter or a confirm button) adds the
      item to the list.
    - Empty or whitespace-only input is ignored (nothing is added).
-   - After adding, the input stays open so the user can add several
-     items in a row.
+   - After adding an item, or when the keyboard is dismissed, the input
+     hides again and only the "Add item" button remains.
 
 2. **Update an item**
    - Tapping an item's text makes it editable in place.

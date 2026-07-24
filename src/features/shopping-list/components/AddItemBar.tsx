@@ -1,5 +1,12 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Keyboard,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input } from '@/shared/components/Input';
 import { useKeyboardHeight } from '@/shared/hooks/useKeyboardHeight';
@@ -40,21 +47,26 @@ export const AddItemBar = forwardRef<AddItemBarHandle, Props>(function AddItemBa
 
   useImperativeHandle(ref, () => ({ open: openBar }));
 
+  const collapse = () => {
+    setText('');
+    setOpen(false);
+  };
+
   const submit = () => {
     const trimmed = text.trim();
     if (trimmed) onAdd(trimmed); // empty / whitespace-only is ignored
-    setText('');
-    focus(); // stay open + focused for the next item
+    // Hide the input after adding; tap the button again to add another.
+    collapse();
+    Keyboard.dismiss();
   };
 
   const handleBlur = () => {
     if (keepOpenRef.current) {
       keepOpenRef.current = false;
-      return; // a submit/confirm is in flight — keep the bar open
+      return; // the Add button is handling this tap — don't collapse yet
     }
     // Keyboard dismissed by tapping away: collapse back to just the button.
-    setText('');
-    setOpen(false);
+    collapse();
   };
 
   // Lift above the keyboard when open; otherwise rest above the home indicator.
