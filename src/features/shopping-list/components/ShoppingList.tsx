@@ -1,14 +1,5 @@
 import { useEffect, useRef } from 'react';
-import {
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { colors, spacing, typography } from '@/shared/theme';
@@ -17,13 +8,14 @@ import { AddItemBar, type AddItemBarHandle } from './AddItemBar';
 import { ShoppingItemRow } from './ShoppingItemRow';
 
 // Feature root. app/index.tsx renders only this. Owns no data logic itself —
-// it reads from the store and wires the pieces together.
+// it reads from the store and wires the pieces together. Keyboard placement is
+// handled inside AddItemBar, so there's no KeyboardAvoidingView here.
 export function ShoppingList() {
   const { items, loaded, load, addItem, renameItem, deleteItem, clear } =
     useShoppingList();
   const addBarRef = useRef<AddItemBarHandle>(null);
 
-  // Load persisted items once on mount (this is why they survive a refresh).
+  // Load persisted items once on mount (this is why they survive a restart).
   useEffect(() => {
     load();
   }, [load]);
@@ -55,10 +47,7 @@ export function ShoppingList() {
         )}
       </View>
 
-      <KeyboardAvoidingView
-        style={styles.body}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <View style={styles.body}>
         {isEmpty ? (
           // Show nothing until the first load resolves, to avoid flashing the
           // empty message before persisted items arrive.
@@ -81,9 +70,9 @@ export function ShoppingList() {
             )}
           />
         )}
+      </View>
 
-        <AddItemBar ref={addBarRef} onAdd={addItem} />
-      </KeyboardAvoidingView>
+      <AddItemBar ref={addBarRef} onAdd={addItem} />
     </SafeAreaView>
   );
 }

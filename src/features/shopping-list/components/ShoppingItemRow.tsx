@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Input } from '@/shared/components/Input';
 import { colors, spacing, typography } from '@/shared/theme';
@@ -10,25 +10,52 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-// One row: a bullet, the item name, and a delete control. Tapping the name
-// turns it into an in-place text field. Confirming an empty name cancels the
-// edit and keeps the old name.
+// One row: a bullet, the item name, and a trailing control.
+//   - Not editing: tapping the name starts an edit; the ✕ deletes the item.
+//   - Editing: an in-place text field; the ✓ confirms the change. Tapping away
+//     (blur) discards the edit and keeps the old name.
 export function ShoppingItemRow({ item, onRename, onDelete }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.name);
 
-  const commit = () => {
-    const trimmed = draft.trim();
-    if (trimmed && trimmed !== item.name) {
-      onRename(item.id, trimmed);
-    }
-    setDraft(trimmed || item.name); // revert visible draft if it was emptied
-    setEditing(false);
-  };
+  // Set right before the ✓ button blurs the input, so the blur handler knows
+  // to confirm rather than discard.
+  const confirmingRef = useRef(false);
+  // Guards against a tap firing both onPress and onBlur — only the first of
+  // confirm/discard per edit takes effect.
+  const settledRef = useRef(false);
 
   const beginEdit = () => {
     setDraft(item.name);
+    settledRef.current = false;
     setEditing(true);
+  };
+
+  const confirm = () => {
+    if (settledRef.current) return;
+    settledRef.current = true;
+    const trimmed = draft.trim();
+    // Empty name is not allowed — keep the old one (see shopping-list.md).
+    if (trimmed && trimmed !== item.name) {
+      onRename(item.id, trimmed);
+    }
+    setEditing(false);
+  };
+
+  const discard = () => {
+    if (settledRef.current) return;
+    settledRef.current = true;
+    setDraft(item.name);
+    setEditing(false);
+  };
+
+  const handleBlur = () => {
+    if (confirmingRef.current) {
+      confirmingRef.current = false;
+      confirm();
+      return;
+    }
+    discard(); // tapped away: throw away the edit
   };
 
   return (
@@ -36,30 +63,46 @@ export function ShoppingItemRow({ item, onRename, onDelete }: Props) {
       <View style={styles.bullet} />
 
       {editing ? (
-        <Input
-          value={draft}
-          onChangeText={setDraft}
-          onSubmitEditing={commit}
-          onBlur={commit}
-          autoFocus
-          returnKeyType="done"
-          style={styles.input}
-        />
+        <>
+          <Input
+            value={draft}
+            onChangeText={setDraft}
+            onSubmitEditing={confirm}
+            onBlur={handleBlur}
+            autoFocus
+            blurOnSubmit={false}
+            returnKeyType="done"
+            style={styles.input}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Save ${item.name}`}
+            hitSlop={8}
+            onPressIn={() => {
+              confirmingRef.current = true;
+            }}
+            onPress={confirm}
+            style={styles.action}
+          >
+            <Text style={styles.check}>✓</Text>
+          </Pressable>
+        </>
       ) : (
-        <Pressable style={styles.namePress} onPress={beginEdit}>
-          <Text style={styles.name}>{item.name}</Text>
-        </Pressable>
+        <>
+          <Pressable style={styles.namePress} onPress={beginEdit}>
+            <Text style={styles.name}>{item.name}</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Delete ${item.name}`}
+            hitSlop={8}
+            onPress={() => onDelete(item.id)}
+            style={styles.action}
+          >
+            <Text style={styles.delete}>✕</Text>
+          </Pressable>
+        </>
       )}
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Delete ${item.name}`}
-        hitSlop={8}
-        onPress={() => onDelete(item.id)}
-        style={styles.delete}
-      >
-        <Text style={styles.deleteText}>✕</Text>
-      </Pressable>
     </View>
   );
 }
@@ -84,6 +127,7 @@ const styles = StyleSheet.create({
   namePress: { flex: 1, paddingVertical: spacing.xs },
   name: { fontSize: typography.body, color: colors.text },
   input: { flex: 1, minHeight: 40 },
-  delete: { padding: spacing.xs },
-  deleteText: { fontSize: typography.body, color: colors.textMuted },
+  action: { padding: spacing.xs },
+  delete: { fontSize: typography.body, color: colors.textMuted },
+  check: { fontSize: typography.body, color: colors.primary, fontWeight: '700' },
 });
