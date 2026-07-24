@@ -31,7 +31,7 @@ extras. Add items, check them off mentally, clear the list, start again.
      is fine).
    - Tapping it removes ALL items so the user can start a new list from
      scratch.
-   - Show one simple confirmation ("Clear the whole list?") because this
+   - Show one simple confirmation ("Have you done shopping?") because this
      deletes everything.
    - The button is hidden or disabled when the list is empty.
 
