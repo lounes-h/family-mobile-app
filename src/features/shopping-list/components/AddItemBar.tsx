@@ -1,12 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import {
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input } from '@/shared/components/Input';
 import { useKeyboardHeight } from '@/shared/hooks/useKeyboardHeight';
@@ -55,9 +48,8 @@ export const AddItemBar = forwardRef<AddItemBarHandle, Props>(function AddItemBa
   const submit = () => {
     const trimmed = text.trim();
     if (trimmed) onAdd(trimmed); // empty / whitespace-only is ignored
-    // Hide the input after adding; tap the button again to add another.
-    collapse();
-    Keyboard.dismiss();
+    setText('');
+    focus(); // keep the input open + focused so several items can be added
   };
 
   const handleBlur = () => {
