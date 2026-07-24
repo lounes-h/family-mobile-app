@@ -14,6 +14,7 @@ const makeItem = (over: Partial<ShoppingItem> = {}): ShoppingItem => ({
   updated_at: '2020-01-01T00:00:00.000Z',
   deleted_at: null,
   bought_at: null,
+  archived_at: null,
   ...over,
 });
 

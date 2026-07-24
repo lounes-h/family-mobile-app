@@ -12,6 +12,7 @@ const makeItem = (over: Partial<ShoppingItem> = {}): ShoppingItem => ({
   updated_at: '2020-01-01T00:00:00.000Z',
   deleted_at: null,
   bought_at: null,
+  archived_at: null,
   ...over,
 });
 
@@ -78,9 +79,14 @@ describe('shopping-list store', () => {
     expect(mockedDb.softDeleteItem).toHaveBeenCalledWith('1');
   });
 
-  it('archive() and clear() both soft-delete everything', () => {
-    store().archive();
+  it('clear() soft-deletes everything', () => {
     store().clear();
-    expect(mockedDb.softDeleteAll).toHaveBeenCalledTimes(2);
+    expect(mockedDb.softDeleteAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('archive() archives everything without deleting', () => {
+    store().archive();
+    expect(mockedDb.archiveAll).toHaveBeenCalledTimes(1);
+    expect(mockedDb.softDeleteAll).not.toHaveBeenCalled();
   });
 });

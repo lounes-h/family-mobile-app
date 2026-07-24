@@ -55,12 +55,11 @@ export const useShoppingList = create<ShoppingListState>((set, get) => {
       refresh();
     },
 
-    // Archive the finished list. For now this soft-deletes every item (rows
-    // are preserved in the DB, the active view empties) — the same mechanism
-    // as clear, but a distinct action so a real "archived lists" view can
-    // diverge here later without touching callers.
+    // Archive the finished list. Unlike clear, archived rows are preserved in
+    // the DB (archived_at set, not deleted_at) — the active view empties but
+    // the completed trip is kept for a future "archived lists" view.
     archive: () => {
-      db.softDeleteAll();
+      db.archiveAll();
       refresh();
     },
 

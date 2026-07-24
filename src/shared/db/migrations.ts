@@ -29,6 +29,13 @@ const migrations: ((db: SQLiteDatabase) => void)[] = [
   (db) => {
     db.execSync(`ALTER TABLE shopping_items ADD COLUMN bought_at TEXT`);
   },
+
+  // v3 — archive a finished list. archived_at (null = not archived) is distinct
+  // from deleted_at: archived rows are PRESERVED in the DB (a completed trip),
+  // just excluded from the active list — not deleted.
+  (db) => {
+    db.execSync(`ALTER TABLE shopping_items ADD COLUMN archived_at TEXT`);
+  },
 ];
 
 // Applies any migrations the database hasn't seen yet, in order, inside a

@@ -7,13 +7,16 @@ import type { ShoppingItem } from './types';
 // functions and never touch the database directly — so v2 (Supabase sync) can
 // swap the insides here without changing anything above.
 //
-// Every write is a soft delete or an update to updated_at; rows are never
-// removed. Every read filters WHERE deleted_at IS NULL, so the UI behaves as
-// if deleted items are gone.
+// Rows are never physically removed. "Active" means not deleted and not
+// archived — every read and mutation filters
+// `deleted_at IS NULL AND archived_at IS NULL`.
 
 function db() {
   return getDatabase();
 }
+
+// Only active rows are eligible for reads and single-item mutations.
+const ACTIVE = 'deleted_at IS NULL AND archived_at IS NULL';
 
 // Active items. Unbought first (in original created_at order), then bought
 // items at the bottom (in the order they were bought). This gives "mark bought
@@ -21,7 +24,7 @@ function db() {
 export function listItems(): ShoppingItem[] {
   return db().getAllSync<ShoppingItem>(
     `SELECT * FROM shopping_items
-     WHERE deleted_at IS NULL
+     WHERE ${ACTIVE}
      ORDER BY
        CASE WHEN bought_at IS NULL THEN 0 ELSE 1 END,
        CASE WHEN bought_at IS NULL THEN created_at ELSE bought_at END ASC`,
@@ -41,12 +44,13 @@ export function insertItem(name: string): ShoppingItem {
     updated_at: now(),
     deleted_at: null,
     bought_at: null,
+    archived_at: null,
   };
 
   db().runSync(
     `INSERT INTO shopping_items
-       (id, name, created_at, updated_at, deleted_at, bought_at)
-     VALUES (?, ?, ?, ?, NULL, NULL)`,
+       (id, name, created_at, updated_at, deleted_at, bought_at, archived_at)
+     VALUES (?, ?, ?, ?, NULL, NULL, NULL)`,
     item.id,
     item.name,
     item.created_at,
@@ -64,7 +68,7 @@ export function renameItem(itemId: string, name: string): void {
   db().runSync(
     `UPDATE shopping_items
      SET name = ?, updated_at = ?
-     WHERE id = ? AND deleted_at IS NULL`,
+     WHERE id = ? AND ${ACTIVE}`,
     trimmed,
     now(),
     itemId,
@@ -77,7 +81,7 @@ export function setBought(itemId: string, bought: boolean): void {
   db().runSync(
     `UPDATE shopping_items
      SET bought_at = ?, updated_at = ?
-     WHERE id = ? AND deleted_at IS NULL`,
+     WHERE id = ? AND ${ACTIVE}`,
     bought ? ts : null,
     ts,
     itemId,
@@ -90,7 +94,7 @@ export function softDeleteItem(itemId: string): void {
   db().runSync(
     `UPDATE shopping_items
      SET deleted_at = ?, updated_at = ?
-     WHERE id = ? AND deleted_at IS NULL`,
+     WHERE id = ? AND ${ACTIVE}`,
     ts,
     ts,
     itemId,
@@ -103,7 +107,21 @@ export function softDeleteAll(): void {
   db().runSync(
     `UPDATE shopping_items
      SET deleted_at = ?, updated_at = ?
-     WHERE deleted_at IS NULL`,
+     WHERE ${ACTIVE}`,
+    ts,
+    ts,
+  );
+}
+
+// Archive every active item (the "Done shopping" flow). Unlike delete, this
+// PRESERVES the rows — they leave the active list but stay in the DB, ready for
+// a future "archived lists" view.
+export function archiveAll(): void {
+  const ts = now();
+  db().runSync(
+    `UPDATE shopping_items
+     SET archived_at = ?, updated_at = ?
+     WHERE ${ACTIVE}`,
     ts,
     ts,
   );

@@ -33,6 +33,7 @@ jest.mock('@/shared/utils/time', () => {
 
 // Imported after the mocks above are registered.
 import {
+  archiveAll,
   insertItem,
   listItems,
   renameItem,
@@ -42,6 +43,12 @@ import {
 } from '../db';
 import { getDatabase } from '@/shared/db';
 
+// Count of ALL rows physically present (regardless of deleted/archived state).
+const totalRows = () =>
+  getDatabase().getFirstSync<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM shopping_items',
+  )?.n ?? 0;
+
 afterEach(() => {
   // Hard-delete everything between tests (the singleton DB is shared).
   getDatabase().runSync('DELETE FROM shopping_items');
@@ -50,15 +57,18 @@ afterEach(() => {
 const names = () => listItems().map((i) => i.name);
 
 describe('shopping-list db', () => {
-  it('runs migrations to the latest version with a bought_at column', () => {
+  it('runs migrations to the latest version with bought/archived columns', () => {
     const version = getDatabase().getFirstSync<{ user_version: number }>(
       'PRAGMA user_version',
     );
-    expect(version?.user_version).toBe(2);
+    expect(version?.user_version).toBe(3);
 
     const item = insertItem('Milk');
     expect(item.bought_at).toBeNull();
-    expect(listItems()[0]).toHaveProperty('bought_at', null);
+    expect(item.archived_at).toBeNull();
+    const listed = listItems()[0];
+    expect(listed).toHaveProperty('bought_at', null);
+    expect(listed).toHaveProperty('archived_at', null);
   });
 
   it('inserts items and lists them oldest-first', () => {
@@ -126,5 +136,33 @@ describe('shopping-list db', () => {
     setBought(milk.id, true);
     softDeleteItem(milk.id);
     expect(listItems()).toEqual([]);
+  });
+
+  it('archiveAll() empties the active list but preserves the rows', () => {
+    insertItem('Milk');
+    insertItem('Eggs');
+
+    archiveAll();
+
+    // Gone from the active list...
+    expect(listItems()).toEqual([]);
+    // ...but still in the database, marked archived (not deleted).
+    expect(totalRows()).toBe(2);
+    const rows = getDatabase().getAllSync<{
+      archived_at: string | null;
+      deleted_at: string | null;
+    }>('SELECT archived_at, deleted_at FROM shopping_items');
+    expect(rows.every((r) => r.archived_at !== null)).toBe(true);
+    expect(rows.every((r) => r.deleted_at === null)).toBe(true);
+  });
+
+  it('archiveAll() leaves already-archived rows untouched', () => {
+    insertItem('Milk');
+    archiveAll();
+    // A second archive with a fresh item only touches the still-active one.
+    insertItem('Eggs');
+    archiveAll();
+    expect(listItems()).toEqual([]);
+    expect(totalRows()).toBe(2);
   });
 });

@@ -7,4 +7,5 @@ export type ShoppingItem = {
   updated_at: string;
   deleted_at: string | null;
   bought_at: string | null; // null = not yet bought
+  archived_at: string | null; // null = active; set = part of an archived list
 };
