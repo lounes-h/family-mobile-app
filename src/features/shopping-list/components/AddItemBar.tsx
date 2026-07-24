@@ -1,4 +1,10 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input } from '@/shared/components/Input';
@@ -60,6 +66,18 @@ export const AddItemBar = forwardRef<AddItemBarHandle, Props>(function AddItemBa
     // Keyboard dismissed by tapping away: collapse back to just the button.
     collapse();
   };
+
+  // Collapse when the keyboard goes from visible to hidden. On Android,
+  // dismissing the keyboard with the system back button does NOT blur the
+  // input, so onBlur alone wouldn't catch it. Watching the height transition
+  // (not a steady 0) avoids collapsing on open, before the keyboard appears.
+  const prevKeyboardHeight = useRef(0);
+  useEffect(() => {
+    const wasVisible = prevKeyboardHeight.current > 0;
+    prevKeyboardHeight.current = keyboardHeight;
+    if (open && wasVisible && keyboardHeight === 0) collapse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyboardHeight, open]);
 
   // Lift above the keyboard when open; otherwise rest above the home indicator.
   // With Android edge-to-edge the reported keyboard height excludes the

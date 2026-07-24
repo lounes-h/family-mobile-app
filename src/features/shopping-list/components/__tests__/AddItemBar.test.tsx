@@ -2,6 +2,16 @@ import { createRef } from 'react';
 import { act, fireEvent, render } from '@testing-library/react-native';
 import { AddItemBar, type AddItemBarHandle } from '../AddItemBar';
 
+// Controllable keyboard height so tests can simulate show/hide.
+let mockKeyboardHeight = 0;
+jest.mock('@/shared/hooks/useKeyboardHeight', () => ({
+  useKeyboardHeight: () => mockKeyboardHeight,
+}));
+
+beforeEach(() => {
+  mockKeyboardHeight = 0;
+});
+
 function setup() {
   const onAdd = jest.fn();
   const ref = createRef<AddItemBarHandle>();
@@ -52,6 +62,25 @@ describe('AddItemBar', () => {
     const { getByText, getByPlaceholderText, queryByPlaceholderText } = setup();
     fireEvent.press(getByText('＋ Add item'));
     fireEvent(getByPlaceholderText('Item name'), 'blur');
+    expect(queryByPlaceholderText('Item name')).toBeNull();
+    expect(getByText('＋ Add item')).toBeTruthy();
+  });
+
+  it('collapses when the keyboard hides without a blur (e.g. Android back)', () => {
+    const onAdd = jest.fn();
+    const { getByText, getByPlaceholderText, queryByPlaceholderText, rerender } =
+      render(<AddItemBar onAdd={onAdd} />);
+
+    fireEvent.press(getByText('＋ Add item'));
+    expect(getByPlaceholderText('Item name')).toBeTruthy();
+
+    // Keyboard appears...
+    mockKeyboardHeight = 300;
+    rerender(<AddItemBar onAdd={onAdd} />);
+    // ...then is dismissed without the input ever blurring.
+    mockKeyboardHeight = 0;
+    rerender(<AddItemBar onAdd={onAdd} />);
+
     expect(queryByPlaceholderText('Item name')).toBeNull();
     expect(getByText('＋ Add item')).toBeTruthy();
   });
