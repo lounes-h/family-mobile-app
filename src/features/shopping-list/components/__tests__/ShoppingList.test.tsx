@@ -104,7 +104,7 @@ describe('ShoppingList — clear', () => {
 
     fireEvent.press(getByText('Clear'));
 
-    expect(alertSpy.mock.calls[0][0]).toBe('Delete list and all its items');
+    expect(alertSpy.mock.calls[0][0]).toBe('Delete list and all its items?');
     const yes = buttonsOf(alertSpy).find((b) => b.text === 'Yes');
     act(() => yes?.onPress?.());
     expect(actions.clear).toHaveBeenCalledTimes(1);

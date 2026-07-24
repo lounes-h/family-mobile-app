@@ -51,7 +51,7 @@ extras. Add items, check them off mentally, clear the list, start again.
      scratch.
    - Clear is a DELETE, distinct from archiving (Done shopping) — the
      items are soft-deleted, not preserved to history. The confirmation
-     makes this explicit: titled "Delete list and all its items" with
+     makes this explicit: titled "Delete list and all its items?" with
      "No" / "Yes" buttons.
    - The button is hidden or disabled when the list is empty.
 
