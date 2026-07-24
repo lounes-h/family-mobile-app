@@ -20,7 +20,7 @@ const store = () => useShoppingList.getState();
 beforeEach(() => {
   jest.clearAllMocks();
   mockedDb.listItems.mockReturnValue([]);
-  useShoppingList.setState({ items: [], loaded: false });
+  useShoppingList.setState({ items: [], loaded: false, lastAddedId: null });
 });
 
 describe('shopping-list store', () => {
@@ -37,10 +37,12 @@ describe('shopping-list store', () => {
     expect(mockedDb.insertItem).not.toHaveBeenCalled();
   });
 
-  it('addItem() inserts a valid name and refreshes', () => {
+  it('addItem() inserts a valid name, refreshes, and records the new id', () => {
+    mockedDb.insertItem.mockReturnValue(makeItem({ id: 'new-1', name: 'Eggs' }));
     store().addItem('Eggs');
     expect(mockedDb.insertItem).toHaveBeenCalledWith('Eggs');
     expect(mockedDb.listItems).toHaveBeenCalled();
+    expect(store().lastAddedId).toBe('new-1');
   });
 
   it('renameItem() ignores an empty name but renames a valid one', () => {

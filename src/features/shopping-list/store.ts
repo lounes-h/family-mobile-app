@@ -9,6 +9,9 @@ import type { ShoppingItem } from './types';
 type ShoppingListState = {
   items: ShoppingItem[];
   loaded: boolean;
+  // Id of the most recently added item, so the screen can scroll it into view
+  // (a fresh item can otherwise land behind the keyboard). null until an add.
+  lastAddedId: string | null;
   load: () => void;
   addItem: (name: string) => void;
   renameItem: (id: string, name: string) => void;
@@ -24,13 +27,14 @@ export const useShoppingList = create<ShoppingListState>((set, get) => {
   return {
     items: [],
     loaded: false,
+    lastAddedId: null,
 
     load: () => refresh(),
 
     addItem: (name) => {
       if (!name.trim()) return; // ignore empty / whitespace-only
-      db.insertItem(name);
-      refresh();
+      const item = db.insertItem(name);
+      set({ items: db.listItems(), loaded: true, lastAddedId: item.id });
     },
 
     renameItem: (id, name) => {

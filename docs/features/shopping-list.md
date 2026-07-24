@@ -30,7 +30,7 @@ extras. Add items, check them off mentally, clear the list, start again.
    - Bought items cannot be edited or deleted — only un-marked. Their name
      is plain text and the delete control is hidden.
    - When the LAST unbought item is marked bought (everything is checked
-     off), a dialog asks "Have you finished shopping?":
+     off), a dialog titled "Done shopping?" appears:
      - **OK** archives the list (all items soft-deleted; the list empties).
      - **Still shopping** un-marks the item that was just checked.
    - Stored as a `bought_at` timestamp (null = not bought), following the

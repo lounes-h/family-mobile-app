@@ -49,7 +49,7 @@ describe('ShoppingList — finish-shopping flow', () => {
     fireEvent.press(getByLabelText('Mark Eggs bought'));
 
     expect(alertSpy).toHaveBeenCalledTimes(1);
-    expect(alertSpy.mock.calls[0][0]).toBe('Have you finished shopping?');
+    expect(alertSpy.mock.calls[0][0]).toBe('Done shopping?');
   });
 
   it('archives when OK is chosen', () => {

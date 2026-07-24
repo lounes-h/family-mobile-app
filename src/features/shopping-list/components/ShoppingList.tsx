@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { colors, spacing, typography } from '@/shared/theme';
 import { useShoppingList } from '../store';
+import type { ShoppingItem } from '../types';
 import { AddItemBar, type AddItemBarHandle } from './AddItemBar';
 import { ShoppingItemRow } from './ShoppingItemRow';
 
@@ -14,6 +15,7 @@ export function ShoppingList() {
   const {
     items,
     loaded,
+    lastAddedId,
     load,
     addItem,
     renameItem,
@@ -23,11 +25,27 @@ export function ShoppingList() {
     clear,
   } = useShoppingList();
   const addBarRef = useRef<AddItemBarHandle>(null);
+  const listRef = useRef<FlatList<ShoppingItem>>(null);
+  const scrolledForRef = useRef<string | null>(null);
 
   // Load persisted items once on mount (this is why they survive a restart).
   useEffect(() => {
     load();
   }, [load]);
+
+  // A freshly added item lands at the end of the unbought group, which can sit
+  // behind the keyboard/add bar. Scroll it into view (once per add).
+  useEffect(() => {
+    if (!lastAddedId || lastAddedId === scrolledForRef.current) return;
+    const index = items.findIndex((i) => i.id === lastAddedId);
+    if (index < 0) return;
+    scrolledForRef.current = lastAddedId;
+    // viewPosition: 1 aligns the item to the bottom of the visible list, just
+    // above the add bar. Deferred so the new row is laid out first.
+    requestAnimationFrame(() =>
+      listRef.current?.scrollToIndex({ index, viewPosition: 1, animated: true }),
+    );
+  }, [lastAddedId, items]);
 
   const openAdd = () => addBarRef.current?.open();
 
@@ -45,7 +63,7 @@ export function ShoppingList() {
 
     if (wasLastUnbought) {
       Alert.alert(
-        'Have you finished shopping?',
+        'Done shopping?',
         "This shopping list will be archived as you're done shopping.",
         [
           // Revert the item we just checked so shopping can continue.
@@ -92,9 +110,16 @@ export function ShoppingList() {
           )
         ) : (
           <FlatList
+            ref={listRef}
             data={items}
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
+            // If the target row isn't measured yet, fall back to the end.
+            onScrollToIndexFailed={() =>
+              requestAnimationFrame(() =>
+                listRef.current?.scrollToEnd({ animated: true }),
+              )
+            }
             renderItem={({ item }) => (
               <ShoppingItemRow
                 item={item}
