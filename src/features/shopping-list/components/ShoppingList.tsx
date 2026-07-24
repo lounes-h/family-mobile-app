@@ -44,11 +44,15 @@ export function ShoppingList() {
     toggleBought(id);
 
     if (wasLastUnbought) {
-      Alert.alert('Have you finished shopping?', 'Everything is checked off.', [
-        // Revert the item we just checked so shopping can continue.
-        { text: 'Still shopping', style: 'cancel', onPress: () => toggleBought(id) },
-        { text: 'OK', onPress: archive },
-      ]);
+      Alert.alert(
+        'Have you finished shopping?',
+        "This shopping list will be archived as you're done shopping.",
+        [
+          // Revert the item we just checked so shopping can continue.
+          { text: 'Still shopping', style: 'cancel', onPress: () => toggleBought(id) },
+          { text: 'OK', onPress: archive },
+        ],
+      );
     }
   };
 
