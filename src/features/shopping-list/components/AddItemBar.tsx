@@ -62,7 +62,9 @@ export const AddItemBar = forwardRef<AddItemBarHandle, Props>(function AddItemBa
   // navigation-bar inset, but the keyboard draws from the true screen bottom —
   // so add insets.bottom to clear the last sliver.
   const paddingBottom =
-    keyboardHeight > 0 ? keyboardHeight + insets.bottom : insets.bottom;
+    keyboardHeight > 0
+      ? keyboardHeight + insets.bottom + spacing.sm
+      : insets.bottom;
 
   return (
     <View style={[styles.bar, { paddingBottom }]}>
